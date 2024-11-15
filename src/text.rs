@@ -27,6 +27,10 @@ pub fn generate_text_doc<'a>(pdfium: &'a Pdfium, text: String, size: f32,) -> Re
     for line in text.lines() {
         log::info!("Creating text line: '{}'", line);
         let mut text_object = PdfPageTextObject::new(&document, line, font, font_size)?;
+        log::info!("Reading before attaching: '{}'", text_object.text());
+        text_object.set_text(line).unwrap();
+        log::info!("Reading overwritten before attaching: '{}'", text_object.text());
+
         text_object.set_fill_color(PdfColor::new(0, 0, 0, 255))?; // Set text color to black
 
         // Position the text on the page
@@ -34,19 +38,10 @@ pub fn generate_text_doc<'a>(pdfium: &'a Pdfium, text: String, size: f32,) -> Re
         y_offset -= PdfPoints::new(font_size.value * 1.4); // Adjust `y_offset` with `PdfPoints`
 
         // Add the text object to the page
-        page.objects_mut().add_text_object(text_object)?;
-    }
-    for obj in page.objects().iter() {
-        match &obj {
-            PdfPageObject::Text(text) => {
-                log::info!("Retreived text line: {}", text.text());
-            }
-            PdfPageObject::Path(_) => {}
-            PdfPageObject::Image(_) => {}
-            PdfPageObject::Shading(_) => {}
-            PdfPageObject::XObjectForm(_) => {}
-            PdfPageObject::Unsupported(_) => {}
-        }
+        let mut to = page.objects_mut().add_text_object(text_object)?;
+        log::info!("Reading after attaching: '{}'", to.as_text_object().unwrap().text());
+        to.as_text_object_mut().unwrap().set_text(line).unwrap();
+        log::info!("Reading overwritten after attaching: '{}'", to.as_text_object().unwrap().text());
     }
 
     Ok(document)
