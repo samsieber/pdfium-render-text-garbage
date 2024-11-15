@@ -1,38 +1,11 @@
 #[cfg(target_arch = "wasm32")]
 use pdfium_render::prelude::*;
 
-pub enum StandardFont {
-    TimesNewRoman,
-    Courier,
-    Helvetica,
-}
-
-impl StandardFont {
-    pub fn get_font_token(self, fonts: &mut PdfFonts, bold: bool, italic: bool) -> PdfFontToken {
-        match (self, bold, italic) {
-            (Self::TimesNewRoman, false, false) => fonts.times_roman(),
-            (Self::TimesNewRoman, true, false) => fonts.times_bold(),
-            (Self::TimesNewRoman, false, true) => fonts.times_italic(),
-            (Self::TimesNewRoman, true, true) => fonts.times_bold_italic(),
-            (Self::Helvetica, false, false) => fonts.helvetica(),
-            (Self::Helvetica, true, false) => fonts.helvetica_bold(),
-            (Self::Helvetica, false, true) => fonts.helvetica_oblique(),
-            (Self::Helvetica, true, true) => fonts.helvetica_bold_oblique(),
-            (Self::Courier, false, false) => fonts.courier(),
-            (Self::Courier, true, false) => fonts.courier_bold(),
-            (Self::Courier, false, true) => fonts.courier_oblique(),
-            (Self::Courier, true, true) => fonts.courier_bold_oblique(),
-        }
-    }
-}
-
-
-pub fn generate_text_doc<'a>(pdfium: &'a Pdfium, text: String, size: f32, bold: bool, italic: bool, font: StandardFont) -> Result<PdfDocument<'a>, PdfiumError> {
+pub fn generate_text_doc<'a>(pdfium: &'a Pdfium, text: String, size: f32,) -> Result<PdfDocument<'a>, PdfiumError> {
     // Create a new blank PDF document
     let mut document = pdfium.create_new_pdf()?;
     let max_chars = text.lines().map(|l| l.chars().count()).max().unwrap_or(1);
     let max_point_width = max_chars as f32 * size * 0.8;
-    let max_pixel_width = max_point_width as f32 * 300.0 / 72.0; // render at 300 dpi
     let lines = text.lines().count();
     let point_height = lines as f32 * size;
 
@@ -42,11 +15,9 @@ pub fn generate_text_doc<'a>(pdfium: &'a Pdfium, text: String, size: f32, bold: 
         PdfPoints::new(point_height * 1.4)
     ))?;
 
-    let media = page.boundaries().media()?.bounds;
-
     // Set the font and font size
     let fonts = document.fonts_mut();
-    let font = font.get_font_token(fonts, bold, italic);//.courier_bold();
+    let font = fonts.times_roman();
     let font_size = PdfPoints::new(size); // Replace with your desired font size
 
     // Define text and starting coordinates
@@ -68,7 +39,7 @@ pub fn generate_text_doc<'a>(pdfium: &'a Pdfium, text: String, size: f32, bold: 
     for obj in page.objects().iter() {
         match &obj {
             PdfPageObject::Text(text) => {
-                log::info!("TEXT: {}", text.text());
+                log::info!("Retreived text line: {}", text.text());
             }
             PdfPageObject::Path(_) => {}
             PdfPageObject::Image(_) => {}

@@ -11,6 +11,10 @@ This is a reproduction of an issue I've run into with creating and setting text 
   * Note that the two generated files are ignored by git 
 * `cd release && ./serve.sh`
 
+## Diagnosing the issue
+
+We render the text by making a small text structure - checkout text.rs. We build the pdf, and render it. The text we set is "new test" but extra junk is included at the end. And fetching the text out via the API before even rendering the image shows the same junk. We log that in the console
+
 ## File Structure
 
 The release directory is mostly prebuilt and contains everything except the stuff we compile ourselves:

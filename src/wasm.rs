@@ -36,8 +36,8 @@ pub async fn get_image_data_for_page(
         .unwrap();
     drop(x);
     let mut docs = vec!();
-    for x in 0..3 {
-        docs.push(text::generate_text_doc(&pdfium, "new test".to_string(), 12.0, false, false, text::StandardFont::TimesNewRoman).unwrap());
+    for _x in 0..3 {
+        docs.push(text::generate_text_doc(&pdfium, "new test".to_string(), 12.0).unwrap());
     };
     let x = docs[0].pages()
             .get(index)
