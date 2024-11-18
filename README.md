@@ -1,6 +1,6 @@
 # README
 
-This is a reproduction of an issue I've run into with creating and setting text on text objects inside of a wasm environment using pdfium-render. It's forked from the example in the pdfium-render library
+This is diagnosing an issue I've run into when rendering pdfs. They sometimes don't render correctly. 
 
 ## Running the example
 
@@ -13,7 +13,7 @@ This is a reproduction of an issue I've run into with creating and setting text 
 
 ## Diagnosing the issue
 
-We render the text by making a small text structure - checkout text.rs. We build the pdf, and render it. The text we set is "new test" but extra junk is included at the end. And fetching the text out via the API before even rendering the image shows the same junk. We log that in the console
+Rendering a page more than once tends to improve the result. Displayed is a color pdf. If you go into index.html line 78 and switch to test.pdf you'll see the first page render noise, but then the subsequent renders work correctly.
 
 ## File Structure
 

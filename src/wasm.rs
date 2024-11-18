@@ -1,4 +1,11 @@
-mod text;
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::Clamped;
+#[cfg(target_arch = "wasm32")]
+use web_sys::{HtmlCanvasElement, CanvasRenderingContext2d};
+
+mod extract;
+use crate::extract::extract_page_image;
+use image::DynamicImage;
 
 #[cfg(target_arch = "wasm32")]
 use pdfium_render::prelude::*;
@@ -9,50 +16,230 @@ use wasm_bindgen::prelude::*;
 #[cfg(target_arch = "wasm32")]
 use web_sys::ImageData;
 
+#[cfg(target_arch = "wasm32")]
+pub async fn internal_write_image_data_for_page(
+    pdfium: &Pdfium,
+    url: String,
+    index: PdfPageIndex
+) {
+    let document = pdfium.load_pdf_from_fetch(&url, None).await.unwrap();
+    let page = document.pages()
+        .get(index)
+        .unwrap();
+    let dynamic_image = extract_page_image(&page).unwrap().unwrap();
+}
+
+#[cfg(target_arch = "wasm32")]
+pub async fn draw(
+    dynamic_image: DynamicImage,
+    canvas1: HtmlCanvasElement
+) {
+    let width = dynamic_image.width();
+    let height = dynamic_image.height();
+    let raw_pixels = dynamic_image.clone().into_rgba8().into_raw();
+    // let raw_pixels2 = dynamic_image.into_rgba8().into_raw();
+    let new_img_data = ImageData::new_with_u8_clamped_array_and_sh(
+        Clamped(&raw_pixels),
+        width,
+        height,
+    ).unwrap();
+
+    let ctx = canvas1
+        .get_context("2d")
+            .unwrap()
+            .expect("Could not get 2d rendering context for OffscreenCanvas")
+            .dyn_into::<CanvasRenderingContext2d>()
+            .unwrap();
+
+    canvas1.set_width(width);
+    canvas1.set_height(height);
+
+    ctx.put_image_data(&new_img_data, 0.0, 0.0);
+}
+
 /// Downloads the given URL, opens it as a PDF document, then returns the ImageData for
 /// the given page index using the given bitmap dimensions.
 #[cfg(target_arch = "wasm32")]
 #[wasm_bindgen]
-pub async fn get_image_data_for_page(
+pub async fn write_image_data_for_page(
     url: String,
     index: PdfPageIndex,
-    width: Pixels,
-    height: Pixels,
-) -> ImageData {
+    canvas1: HtmlCanvasElement,
+    canvas2: HtmlCanvasElement,
+    canvas3: HtmlCanvasElement,
+    canvas4: HtmlCanvasElement,
+    canvas5: HtmlCanvasElement,
+    canvas6: HtmlCanvasElement,
+) {
+
     let pdfium = Pdfium::default();
-    let document = pdfium.load_pdf_from_fetch(url, None).await.unwrap();
-    let x = document.pages()
+    let document1 = pdfium.load_pdf_from_fetch(&url, None).await.unwrap();
+    let page1 = document1.pages()
         .get(index)
-        .unwrap()
-        .render_with_config(
-            &PdfRenderConfig::new()
-                .set_target_size(width, height)
-                .render_form_data(true)
-                .highlight_text_form_fields(PdfColor::YELLOW.with_alpha(128))
-                .highlight_checkbox_form_fields(PdfColor::BLUE.with_alpha(128)),
-        )
-        .unwrap()
-        .as_image_data()
         .unwrap();
-    drop(x);
-    let mut docs = vec!();
-    for _x in 0..3 {
-        docs.push(text::generate_text_doc(&pdfium, "new test".to_string(), 12.0).unwrap());
-    };
-    let x = docs[0].pages()
-            .get(index)
+    let dynamic_image = extract_page_image(&page1).unwrap().unwrap();
+    // draw(dynamic_image, canvas1);
+
+    let width = dynamic_image.width();
+    let height = dynamic_image.height();
+    let raw_pixels = dynamic_image.into_rgba8().into_raw();
+    // let raw_pixels2 = dynamic_image.into_rgba8().into_raw();
+    let new_img_data = ImageData::new_with_u8_clamped_array_and_sh(
+        Clamped(&raw_pixels),
+        width,
+        height,
+    ).unwrap();
+
+    let ctx = canvas1
+        .get_context("2d")
             .unwrap()
-            .render_with_config(
-                &PdfRenderConfig::new()
-                    .set_target_size(width, height)
-                    .render_form_data(true)
-                    .highlight_text_form_fields(PdfColor::YELLOW.with_alpha(128))
-                    .highlight_checkbox_form_fields(PdfColor::BLUE.with_alpha(128)),
-            )
-            .unwrap()
-            .as_image_data()
+            .expect("Could not get 2d rendering context for OffscreenCanvas")
+            .dyn_into::<CanvasRenderingContext2d>()
             .unwrap();
-    x
+
+    canvas1.set_width(width);
+    canvas1.set_height(height);
+
+    ctx.put_image_data(&new_img_data, 0.0, 0.0);
+
+    let document2 = pdfium.load_pdf_from_fetch(&url, None).await.unwrap();
+    let page2 = document2.pages()
+        .get(index)
+        .unwrap();
+    let dynamic_image = extract_page_image(&page2).unwrap().unwrap();
+
+    let width = dynamic_image.width();
+    let height = dynamic_image.height();
+    let raw_pixels = dynamic_image.into_rgba8().into_raw();
+    // let raw_pixels2 = dynamic_image.into_rgba8().into_raw();
+    let new_img_data = ImageData::new_with_u8_clamped_array_and_sh(
+        Clamped(&raw_pixels),
+        width,
+        height,
+    ).unwrap();
+
+    let ctx = canvas2
+        .get_context("2d")
+            .unwrap()
+            .expect("Could not get 2d rendering context for OffscreenCanvas")
+            .dyn_into::<CanvasRenderingContext2d>()
+            .unwrap();
+
+    canvas2.set_width(width);
+    canvas2.set_height(height);
+
+    ctx.put_image_data(&new_img_data, 0.0, 0.0);
+
+
+    let document3 = pdfium.load_pdf_from_fetch(&url, None).await.unwrap();
+    let page3 = document3.pages()
+        .get(index)
+        .unwrap();
+    let dynamic_image = extract_page_image(&page3).unwrap().unwrap();
+
+    let width = dynamic_image.width();
+    let height = dynamic_image.height();
+    let raw_pixels = dynamic_image.into_rgba8().into_raw();
+    let new_img_data = ImageData::new_with_u8_clamped_array_and_sh(
+        Clamped(&raw_pixels),
+        width,
+        height,
+    ).unwrap();
+
+    let ctx = canvas3
+        .get_context("2d")
+            .unwrap()
+            .expect("Could not get 2d rendering context for OffscreenCanvas")
+            .dyn_into::<CanvasRenderingContext2d>()
+            .unwrap();
+
+    canvas3.set_width(width);
+    canvas3.set_height(height);
+
+    ctx.put_image_data(&new_img_data, 0.0, 0.0);
+
+
+    let document4 = pdfium.load_pdf_from_fetch(&url, None).await.unwrap();
+    let page4 = document4.pages()
+        .get(index)
+        .unwrap();
+    let dynamic_image = extract_page_image(&page4).unwrap().unwrap();
+
+    let width = dynamic_image.width();
+    let height = dynamic_image.height();
+    let raw_pixels = dynamic_image.into_rgba8().into_raw();
+    let new_img_data = ImageData::new_with_u8_clamped_array_and_sh(
+        Clamped(&raw_pixels),
+        width,
+        height,
+    ).unwrap();
+
+    let ctx = canvas4
+        .get_context("2d")
+            .unwrap()
+            .expect("Could not get 2d rendering context for OffscreenCanvas")
+            .dyn_into::<CanvasRenderingContext2d>()
+            .unwrap();
+
+    canvas4.set_width(width);
+    canvas4.set_height(height);
+
+    ctx.put_image_data(&new_img_data, 0.0, 0.0);
+
+
+
+
+    let document5 = pdfium.load_pdf_from_fetch(&url, None).await.unwrap();
+    let page5 = document5.pages()
+        .get(index)
+        .unwrap();
+    let dynamic_image = extract_page_image(&page5).unwrap().unwrap();
+
+    let width = dynamic_image.width();
+    let height = dynamic_image.height();
+    let raw_pixels = dynamic_image.into_rgba8().into_raw();
+    let new_img_data = ImageData::new_with_u8_clamped_array_and_sh(
+        Clamped(&raw_pixels),
+        width,
+        height,
+    ).unwrap();
+
+    let ctx = canvas5
+        .get_context("2d")
+            .unwrap()
+            .expect("Could not get 2d rendering context for OffscreenCanvas")
+            .dyn_into::<CanvasRenderingContext2d>()
+            .unwrap();
+    canvas5.set_width(width);
+    canvas5.set_height(height);
+    ctx.put_image_data(&new_img_data, 0.0, 0.0);
+
+
+
+    let document6 = pdfium.load_pdf_from_fetch(&url, None).await.unwrap();
+    let page6 = document6.pages()
+        .get(index)
+        .unwrap();
+    let dynamic_image = extract_page_image(&page6).unwrap().unwrap();
+
+    let width = dynamic_image.width();
+    let height = dynamic_image.height();
+    let raw_pixels = dynamic_image.into_rgba8().into_raw();
+    let new_img_data = ImageData::new_with_u8_clamped_array_and_sh(
+        Clamped(&raw_pixels),
+        width,
+        height,
+    ).unwrap();
+
+    let ctx = canvas6
+        .get_context("2d")
+            .unwrap()
+            .expect("Could not get 2d rendering context for OffscreenCanvas")
+            .dyn_into::<CanvasRenderingContext2d>()
+            .unwrap();
+    canvas6.set_width(width);
+    canvas6.set_height(height);
+    ctx.put_image_data(&new_img_data, 0.0, 0.0);
 }
 
 // Source files in examples/ directory are expected to always have a main() entry-point.
