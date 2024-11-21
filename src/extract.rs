@@ -9,6 +9,7 @@ pub fn extract_page_image(page: &PdfPage) -> Result<Option<DynamicImage>, Pdfium
             if let Some(image) =  &obj {
                 if let Some(image) = image.as_image_object() {
                     log::debug!("Before bounds");
+                    // Comment this out to stop the weird image data (somehow...)
                     let bounds = image.bounds()?; 
                     log::debug!("Before bounds");
                     let media_box = page.boundaries().media()?;
